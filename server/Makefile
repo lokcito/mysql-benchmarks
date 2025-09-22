@@ -14,7 +14,11 @@ build:
 
 ## Run: Correr el contenedor en segundo plano
 run:
-	docker run -d --name $(CONTAINER_NAME) -p $(PORT):$(PORT) $(IMAGE_NAME)
+	docker run -d --name $(CONTAINER_NAME) -e MARIADB_ROOT_PASSWORD=secret123 \
+  -e MARIADB_DATABASE=midb \
+  -e MARIADB_USER=usuario \
+  -e MARIADB_PASSWORD=clave123 \
+  -p $(PORT):$(PORT) $(IMAGE_NAME)
 
 ## Exec: Entrar al contenedor con bash
 exec:
