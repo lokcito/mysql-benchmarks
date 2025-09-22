@@ -13,8 +13,8 @@ build:
 	docker build -t $(IMAGE_NAME) .
 
 ## Run: Correr el contenedor en segundo plano
-run:
-	docker run -d --name $(CONTAINER_NAME) -p $(PORT):$(PORT) $(IMAGE_NAME)
+consultar:
+	docker run -it --rm --name $(CONTAINER_NAME) $(IMAGE_NAME)
 
 ## Exec: Entrar al contenedor con bash
 exec:
