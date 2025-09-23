@@ -4,7 +4,7 @@ import time
 import mysql.connector
 from faker import Faker
 
-DB_NAME = "miappdb"
+DB_NAME = "midb"
 
 TABLES = {
     "Usuarios": """
@@ -46,9 +46,9 @@ fake = Faker()
 
 def connect_db():
     return mysql.connector.connect(
-        host="localhost",
+        host="container-mysql-server",
         user="root",
-        password="root",  # 👈 ajusta tu password
+        password="secret123",  # 👈 ajusta tu password
     )
 
 
