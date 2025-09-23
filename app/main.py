@@ -17,17 +17,17 @@ TABLES = {
     "Usuarios": """
         CREATE TABLE IF NOT EXISTS Usuarios (
             id INT AUTO_INCREMENT PRIMARY KEY,
-            nombre VARCHAR(100),
-            email VARCHAR(100) UNIQUE,
-            telefono VARCHAR(20),
-            direccion VARCHAR(200),
+            nombre VARCHAR(250),
+            email VARCHAR(250) UNIQUE,
+            telefono VARCHAR(250),
+            direccion VARCHAR(250),
             fecha_registro DATETIME
         )
     """,
     "Productos": """
         CREATE TABLE IF NOT EXISTS Productos (
             id INT AUTO_INCREMENT PRIMARY KEY,
-            nombre VARCHAR(100),
+            nombre VARCHAR(250),
             descripcion TEXT,
             precio DECIMAL(10,2),
             stock INT,
@@ -41,7 +41,7 @@ TABLES = {
             producto_id INT,
             cantidad INT,
             fecha_compra DATETIME,
-            metodo_pago VARCHAR(50),
+            metodo_pago VARCHAR(250),
             FOREIGN KEY (usuario_id) REFERENCES Usuarios(id),
             FOREIGN KEY (producto_id) REFERENCES Productos(id)
         )
