@@ -4,7 +4,7 @@ import time
 from faker import Faker
 from sqlalchemy import create_engine, text
 
-DB_NAME = "midb"
+DB_NAME = "mi_gran_db"
 DB_USER = "root"
 DB_PASSWORD = "secret123"
 DB_HOST = "container-mysql-server"
