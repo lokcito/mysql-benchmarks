@@ -14,7 +14,7 @@ build:
 
 ## Run: Correr el contenedor en segundo plano
 consultar:
-	docker run -it --rm --name $(CONTAINER_NAME) $(IMAGE_NAME)
+	docker run --network mynet -it --rm --name $(CONTAINER_NAME) $(IMAGE_NAME)
 
 ## Exec: Entrar al contenedor con bash
 exec:

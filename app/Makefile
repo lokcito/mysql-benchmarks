@@ -18,11 +18,11 @@ commands:
 
 ## Inicializar DB
 init:
-	docker run --rm $(IMAGE_NAME) python main.py init
+	docker run --network mynet --rm $(IMAGE_NAME) python main.py init
 
 ## poblar DB, --sleep 0.1
 populate:
-	docker run --rm $(IMAGE_NAME) python main.py populate
+	docker run --network mynet --rm $(IMAGE_NAME) python main.py populate
 
 ## poblar DB, --sleep 0.1
 reset:

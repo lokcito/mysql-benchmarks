@@ -14,7 +14,7 @@ build:
 
 ## Run: Correr el contenedor en segundo plano
 run:
-	docker run -d --name $(CONTAINER_NAME) -e MARIADB_ROOT_PASSWORD=secret123 \
+	docker run --network mynet -d --name $(CONTAINER_NAME) -e MARIADB_ROOT_PASSWORD=secret123 \
   -e MARIADB_DATABASE=midb \
   -e MARIADB_USER=usuario \
   -e MARIADB_PASSWORD=clave123 \
