@@ -14,7 +14,7 @@ PORT = 5151
 build:
 	docker build -t $(IMAGE_NAME) .
 
-## Run-dev: Correr el contenedor mapeando el código para desarrollo (hot reload)
+## Run: Correr el contenedor mapeando el código para desarrollo (hot reload)
 run:
 	docker run -d --name $(CONTAINER_NAME) -p $(PORT):$(PORT) -v $(shell pwd):/app $(IMAGE_NAME)
 
