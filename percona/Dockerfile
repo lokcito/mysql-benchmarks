@@ -1,12 +1,17 @@
-FROM percona:10.5
+FROM percona/percona-server:8.0
 
-# Exponer puerto diferente, por ejemplo el 3307 en lugar del 3306
-EXPOSE 3307
+USER root
 
-# Instalar Percona Toolkit
-RUN apt-get update && \
-    apt-get install -y percona-toolkit && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+# Actualizar e instalar herramientas necesarias para agregar repositorios
+RUN apt-get update && apt-get install -y wget gnupg lsb-release
 
-CMD ["mysqld", "--port=3307"]
+# Agregar repositorio oficial de Percona para toolkit
+RUN wget https://repo.percona.com/apt/percona-release_latest.$(lsb_release -sc)_all.deb && \
+    dpkg -i percona-release_latest.$(lsb_release -sc)_all.deb && \
+    percona-release enable tools release && \
+    apt-get update
+
+# Instalar percona-toolkit
+RUN apt-get install -y percona-toolkit && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+CMD ["mysqld"]

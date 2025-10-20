@@ -1,3 +1,5 @@
+.NO_PRINT_DIRECTORY:
+
 # Nombre de la imagen y el contenedor
 IMAGE_NAME = image-percona-server
 CONTAINER_NAME = container-percona-server
