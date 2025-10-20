@@ -5,7 +5,6 @@ FROM debian:bullseye-slim
 RUN apt-get update && apt-get install -y \
     mariadb-client \
     percona-toolkit \
-    mysql-client --no-install-recommends \
     bash \
     curl \
     && apt-get clean
