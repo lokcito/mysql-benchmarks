@@ -7,8 +7,8 @@ from sqlalchemy import create_engine, text
 DB_NAME = "mi_gran_db"
 DB_USER = "root"
 DB_PASSWORD = "secret123"
-DB_HOST = "container-mysql-server"
-DB_PORT = 3306
+DB_HOST = "container-percona-server"
+DB_PORT = 3307
 
 fake = Faker()
 
