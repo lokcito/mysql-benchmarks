@@ -159,6 +159,104 @@ def populate(sleep):
         click.echo(f"✅ Poblado terminado: {counts}")
 
 @cli.command()
+def slow_select():
+    """Consulta SELECT continua cada 5 segundos para simular carga de lectura"""
+    click.echo("Iniciando consultas SELECT continuas cada 5 segundos...")
+    try:
+        with db_engine().connect() as conn:
+            while True:
+                result = conn.execute(text("SELECT COUNT(*) FROM Usuarios")).fetchone()
+                click.echo(f"Usuarios count: {result[0]}")
+                time.sleep(5)
+    except KeyboardInterrupt:
+        click.echo("Interrumpido por usuario.")
+
+@cli.command()
+def slow_update():
+    """Updates pausados cada 5 segundos en filas aleatorias"""
+    click.echo("Iniciando updates pausados cada 5 segundos en Usuarios...")
+    try:
+        with db_engine().begin() as conn:
+            usuario_ids = [row[0] for row in conn.execute(text("SELECT id FROM Usuarios")).fetchall()]
+        while True:
+            with db_engine().begin() as conn:
+                uid = random.choice(usuario_ids)
+                new_phone = fake.phone_number()
+                conn.execute(
+                    text("UPDATE Usuarios SET telefono = :phone WHERE id = :id"),
+                    {"phone": new_phone, "id": uid}
+                )
+                click.echo(f"Actualizado telefono para usuario id {uid} a {new_phone}")
+            time.sleep(5)
+    except KeyboardInterrupt:
+        click.echo("Interrumpido por usuario.")
+
+@cli.command()
+def slow_insert():
+    """Inserts pausados cada 5 segundos en UsuarioProductos"""
+    click.echo("Iniciando inserts pausados cada 5 segundos en UsuarioProductos...")
+    try:
+        with db_engine().begin() as conn:
+            usuario_ids = [row[0] for row in conn.execute(text("SELECT id FROM Usuarios")).fetchall()]
+            productos_ids = [row[0] for row in conn.execute(text("SELECT id FROM Productos")).fetchall()]
+        while True:
+            with db_engine().begin() as conn:
+                conn.execute(
+                    text("INSERT INTO UsuarioProductos (usuario_id, producto_id, cantidad, fecha_compra, metodo_pago) VALUES (:u,:p,:c,NOW(),:m)"),
+                    {
+                        "u": random.choice(usuario_ids),
+                        "p": random.choice(productos_ids),
+                        "c": random.randint(1, 5),
+                        "m": random.choice(["efectivo", "tarjeta", "yape", "plin"]),
+                    }
+                )
+                click.echo("Insert en UsuarioProductos realizado.")
+            time.sleep(5)
+    except KeyboardInterrupt:
+        click.echo("Interrumpido por usuario.")
+
+@cli.command()
+def mixed_load():
+    """Ejecuta en paralelo updates, selects simples y selects con joins cada 5 segundos"""
+    click.echo("Iniciando carga mixta (update, select simple, select con join) cada 5 segundos...")
+    try:
+        with db_engine().begin() as conn:
+            usuario_ids = [row[0] for row in conn.execute(text("SELECT id FROM Usuarios")).fetchall()]
+            producto_ids = [row[0] for row in conn.execute(text("SELECT id FROM Productos")).fetchall()]
+        while True:
+            with db_engine().begin() as conn:
+                # UPDATE en Usuarios - cambio telefono
+                uid = random.choice(usuario_ids)
+                new_phone = fake.phone_number()
+                conn.execute(
+                    text("UPDATE Usuarios SET telefono = :phone WHERE id = :id"),
+                    {"phone": new_phone, "id": uid}
+                )
+                click.echo(f"Update: Teléfono usuario_id={uid} a {new_phone}")
+
+                # SELECT simple - contar productos
+                prod_count = conn.execute(text("SELECT COUNT(*) FROM Productos")).fetchone()[0]
+                click.echo(f"Select simple: Total productos = {prod_count}")
+
+                # SELECT con JOIN - productos comprados por un usuario aleatorio
+                uid_join = random.choice(usuario_ids)
+                join_result = conn.execute(
+                    text("""
+                        SELECT p.nombre, up.cantidad, up.metodo_pago
+                        FROM UsuarioProductos up
+                        JOIN Productos p ON up.producto_id = p.id
+                        WHERE up.usuario_id = :uid
+                        LIMIT 3
+                    """),
+                    {"uid": uid_join}
+                ).fetchall()
+                click.echo(f"Select join: Productos del usuario_id={uid_join}: {join_result}")
+            time.sleep(5)
+    except KeyboardInterrupt:
+        click.echo("Interrumpido por usuario.")
+
+
+@cli.command()
 def reset():
     """Elimina la DB y la recrea"""
     with base_engine().connect() as conn:

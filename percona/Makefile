@@ -1,9 +1,9 @@
 # Nombre de la imagen y el contenedor
-IMAGE_NAME = image-script-app
-CONTAINER_NAME = container-script-app
+IMAGE_NAME = image-percona-server
+CONTAINER_NAME = container-percona-server
 
-# Puerto que expone
-PORT = 5151
+# Puerto que expone y usa internamente (puedes cambiarlo para evitar conflictos)
+PORT = 3307
 
 # Default target
 .DEFAULT_GOAL := help
@@ -12,17 +12,13 @@ PORT = 5151
 build:
 	docker build -t $(IMAGE_NAME) .
 
-## Run-dev: Correr el contenedor mapeando el código para desarrollo (hot reload)
+## Run: Correr el contenedor en segundo plano con red personalizada y puerto mapeado
 run:
-	docker run -d --name $(CONTAINER_NAME) -p $(PORT):$(PORT) -v $(shell pwd):/app $(IMAGE_NAME)
-
-## Listar comandos disponibles
-commands:
-	docker run --rm $(IMAGE_NAME)
-
-## Benchmark: Ejecutar comandos de benchmark pasados como argumento
-bench:
-	docker run --network mynet --rm $(IMAGE_NAME) python main.py $(ARGS)
+	docker run --network mynet -d --name $(CONTAINER_NAME) -e MYSQL_ROOT_PASSWORD=secret123 \
+  -e MYSQL_DATABASE=midb \
+  -e MYSQL_USER=usuario \
+  -e MYSQL_PASSWORD=clave123 \
+  -p $(PORT):$(PORT) $(IMAGE_NAME) mysqld --port=$(PORT)
 
 ## Exec: Entrar al contenedor con bash
 exec:
