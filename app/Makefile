@@ -26,6 +26,9 @@ commands:
 bench:
 	docker run --network mynet --rm $(IMAGE_NAME) python main.py $(ARGS)
 
+test:
+	docker run --network mynet --rm $(IMAGE_NAME) python test.py $(ARGS)
+
 ## Exec: Entrar al contenedor con bash
 exec:
 	docker exec -it $(CONTAINER_NAME) bash
