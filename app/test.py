@@ -14,13 +14,13 @@ fake = Faker()
 
 # DDL de tablas
 TABLES = {
-    "carreras": """
+    "carrera": """
         CREATE TABLE carrera (
             id_carrera INT PRIMARY KEY AUTO_INCREMENT,
             nombre VARCHAR(100)
         )
     """,
-    "estudiantes": """
+    "estudiante": """
         CREATE TABLE estudiante (
             id_estudiante INT PRIMARY KEY AUTO_INCREMENT,
             nombre VARCHAR(100),
@@ -28,14 +28,14 @@ TABLES = {
             FOREIGN KEY (id_carrera) REFERENCES carrera(id_carrera)
         )
     """,
-    "cursos": """
+    "curso": """
         CREATE TABLE curso (
             id_curso INT PRIMARY KEY AUTO_INCREMENT,
             nombre VARCHAR(100),
             creditos INT
         )    
     """,
-    "matriculas": """
+    "matricula": """
         CREATE TABLE matricula (
             id_matricula INT PRIMARY KEY AUTO_INCREMENT,
             id_estudiante INT,
@@ -45,7 +45,7 @@ TABLES = {
             FOREIGN KEY (id_curso) REFERENCES curso(id_curso)
         )
     """,
-    "notas": """
+    "nota": """
         CREATE TABLE nota (
             id_nota INT PRIMARY KEY AUTO_INCREMENT,
             id_matricula INT,
