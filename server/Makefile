@@ -62,7 +62,7 @@ logs:
 	docker logs -f $(CONTAINER_NAME)
 
 ## Run all: Correr el contenedor en segundo plano
-run-all: run-db
+run: run-db
 	sleep 5
 	$(MAKE) run-pma
 
