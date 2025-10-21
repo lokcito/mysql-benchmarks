@@ -2,6 +2,10 @@
 IMAGE_NAME = image-mysql-server
 CONTAINER_NAME = container-mysql-server
 
+# Nuevas variables para phpMyAdmin
+PMA_CONTAINER_NAME=mi-phpmyadmin
+PMA_PORT=8080
+
 # Puerto que expone
 PORT = 3306
 
@@ -13,12 +17,20 @@ build:
 	docker build -t $(IMAGE_NAME) .
 
 ## Run: Correr el contenedor en segundo plano
-run:
+run-db:
 	docker run --network mynet -d --name $(CONTAINER_NAME) -e MARIADB_ROOT_PASSWORD=secret123 \
   -e MARIADB_DATABASE=midb \
   -e MARIADB_USER=usuario \
   -e MARIADB_PASSWORD=clave123 \
   -p $(PORT):$(PORT) $(IMAGE_NAME)
+
+# Nuevo comando para phpMyAdmin
+run-pma:
+	docker run --network mynet -d --name $(PMA_CONTAINER_NAME) \
+		-e PMA_HOST=$(CONTAINER_NAME) \
+		-e PMA_PORT=3306 \
+		-p $(PMA_PORT):80 \
+		phpmyadmin/phpmyadmin:latest
 
 ## Exec: Entrar al contenedor con bash
 exec:
@@ -30,7 +42,8 @@ start:
 
 ## Stop: Detener el contenedor en ejecución
 stop:
-	docker stop $(CONTAINER_NAME)
+	docker stop $(CONTAINER_NAME) $(PMA_CONTAINER_NAME) || true
+	docker rm $(CONTAINER_NAME) $(PMA_CONTAINER_NAME) || true
 
 ## Remove: Eliminar el contenedor
 rm:
@@ -47,6 +60,11 @@ ps:
 ## Logs: Ver logs del contenedor
 logs:
 	docker logs -f $(CONTAINER_NAME)
+
+## Run all: Correr el contenedor en segundo plano
+run-all: run-db
+	sleep 5
+	$(MAKE) run-pma
 
 ## Help: Mostrar ayuda
 help:
