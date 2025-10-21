@@ -103,11 +103,13 @@ def populate_data(sleep_time=0, target_size_mb=20):
         # -------------------
         # 1️⃣ Carreras
         # -------------------
+        carreras_ids = []
         for i in range(1, num_carreras + 1):
             conn.execute(
                 text("INSERT INTO carrera (nombre) VALUES (:n)"),
                 {"n": f"Carrera {i}"}
             )
+            carreras_ids.append(i)
         click.echo("✅ Carreras insertadas")
 
         # -------------------
@@ -131,7 +133,7 @@ def populate_data(sleep_time=0, target_size_mb=20):
                 text("INSERT INTO estudiante (nombre, id_carrera) VALUES (:n, :c)"),
                 {
                     "n": f"Estudiante_{i}_{random.choice(string.ascii_lowercase)}",
-                    "c": random.randint(1, num_carreras)
+                    "c": random.choice(carreras_ids)
                 }
             )
             if sleep_time > 0:
