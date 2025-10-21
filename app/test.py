@@ -3,6 +3,7 @@ import random
 import time
 from faker import Faker
 from sqlalchemy import create_engine, text
+import string
 
 DB_NAME = "escuela_db"
 DB_USER = "root"
