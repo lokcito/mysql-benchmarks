@@ -143,9 +143,9 @@ def populate_data(sleep_time=0, target_size_mb=20):
         # -------------------
         # 4️⃣ Matrículas
         # -------------------
-        carreras_ids = [row[0] for row in conn.execute(text("SELECT id FROM carrera")).fetchall()]
-        cursos_ids = [row[0] for row in conn.execute(text("SELECT id FROM curso")).fetchall()]
-        estudiantes_ids = [row[0] for row in conn.execute(text("SELECT id FROM estudiante")).fetchall()]
+        carreras_ids = [row[0] for row in conn.execute(text("SELECT id_carrera FROM carrera")).fetchall()]
+        cursos_ids = [row[0] for row in conn.execute(text("SELECT id_curso FROM curso")).fetchall()]
+        estudiantes_ids = [row[0] for row in conn.execute(text("SELECT id_estudiante FROM estudiante")).fetchall()]
 
         for est_id in estudiantes_ids:
             for _ in range(random.randint(1, 5)):
