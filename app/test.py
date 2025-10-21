@@ -86,100 +86,92 @@ def count_records():
             counts[table] = result[0]
     return counts
 
-def populate_data(
-    sleep_time=0,       # segundos entre lotes
-    target_size_mb=20,  # tamaño deseado aprox en MB
-    min_rows=500        # mínimo de filas por tabla
-):
-    # Conexión a MySQL
-    conn = mysql.connector.connect(
-        host="localhost",
-        user="root",
-        password="tu_password",
-        database="universidad"
-    )
-    cursor = conn.cursor()
-
+def populate_data(sleep_time=0, target_size_mb=20):
     target_bytes = target_size_mb * 1024 * 1024
-    approx_size_per_row = 500  # bytes estimados por fila
-    num_rows = max(target_bytes // approx_size_per_row, min_rows)
-    print(f"Inserting approximately {num_rows} rows per table...")
+    approx_size_per_row = 500
+    num_rows = int(target_bytes // approx_size_per_row)
 
-    # -------------------
-    # 1️⃣ Poblar CARRERA
-    # -------------------
-    carreras = [f"Carrera {i}" for i in range(1, 51)]
-    cursor.executemany("INSERT INTO carrera (nombre) VALUES (%s);", [(c,) for c in carreras])
-    conn.commit()
-    print("✅ Insertadas carreras")
+    num_carreras = 50
+    num_cursos = 500
+    num_estudiantes = num_rows
+    num_matriculas = num_estudiantes * 3  # promedio 3 por estudiante
 
-    # -------------------
-    # 2️⃣ Poblar CURSO
-    # -------------------
-    cursos = []
-    for i in range(1, 501):
-        nombre = f"Curso_{i}_{random.choice(string.ascii_uppercase)}"
-        creditos = random.randint(1, 5)
-        cursos.append((nombre, creditos))
-    cursor.executemany("INSERT INTO curso (nombre, creditos) VALUES (%s, %s);", cursos)
-    conn.commit()
-    print("✅ Insertados cursos")
+    click.echo(f"Poblando {num_carreras} carreras, {num_cursos} cursos, {num_estudiantes} estudiantes, {num_matriculas} matrículas...")
 
-    # -------------------
-    # 3️⃣ Poblar ESTUDIANTE
-    # -------------------
-    estudiantes = []
-    for i in range(int(num_rows)):
-        nombre = f"Estudiante_{i}_{random.choice(string.ascii_lowercase)}"
-        id_carrera = random.randint(1, len(carreras))
-        estudiantes.append((nombre, id_carrera))
-    cursor.executemany("INSERT INTO estudiante (nombre, id_carrera) VALUES (%s, %s);", estudiantes)
-    conn.commit()
-    print("✅ Insertados estudiantes")
+    with db_engine().begin() as conn:
+        # -------------------
+        # 1️⃣ Carreras
+        # -------------------
+        for i in range(1, num_carreras + 1):
+            conn.execute(
+                text("INSERT INTO carrera (nombre) VALUES (:n)"),
+                {"n": f"Carrera {i}"}
+            )
+        click.echo("✅ Carreras insertadas")
 
-    # -------------------
-    # 4️⃣ Poblar MATRICULA
-    # -------------------
-    # Cada estudiante se matricula entre 1 y 5 cursos
-    matriculas = []
-    for est_id in range(1, len(estudiantes) + 1):
-        num_cursos = random.randint(1, 5)
-        for _ in range(num_cursos):
-            id_curso = random.randint(1, len(cursos))
-            fecha = f"2025-{random.randint(1, 12):02d}-{random.randint(1, 28):02d}"
-            matriculas.append((est_id, id_curso, fecha))
-        if sleep_time:
-            time.sleep(sleep_time)
-    cursor.executemany(
-        "INSERT INTO matricula (id_estudiante, id_curso, fecha) VALUES (%s, %s, %s);",
-        matriculas
-    )
-    conn.commit()
-    print("✅ Insertadas matrículas")
+        # -------------------
+        # 2️⃣ Cursos
+        # -------------------
+        for i in range(1, num_cursos + 1):
+            conn.execute(
+                text("INSERT INTO curso (nombre, creditos) VALUES (:n, :c)"),
+                {
+                    "n": f"Curso_{i}_{random.choice(string.ascii_uppercase)}",
+                    "c": random.randint(1, 5)
+                }
+            )
+        click.echo("✅ Cursos insertados")
 
-    # -------------------
-    # 5️⃣ Poblar NOTA
-    # -------------------
-    cursor.execute("SELECT id_matricula FROM matricula;")
-    all_matriculas = [row[0] for row in cursor.fetchall()]
-    notas = [(mid, round(random.uniform(0, 20), 2)) for mid in all_matriculas]
-    cursor.executemany("INSERT INTO nota (id_matricula, nota_final) VALUES (%s, %s);", notas)
-    conn.commit()
-    print("✅ Insertadas notas")
+        # -------------------
+        # 3️⃣ Estudiantes
+        # -------------------
+        for i in range(num_estudiantes):
+            conn.execute(
+                text("INSERT INTO estudiante (nombre, id_carrera) VALUES (:n, :c)"),
+                {
+                    "n": f"Estudiante_{i}_{random.choice(string.ascii_lowercase)}",
+                    "c": random.randint(1, num_carreras)
+                }
+            )
+            if sleep_time > 0:
+                time.sleep(sleep_time)
+        click.echo("✅ Estudiantes insertados")
 
-    # -------------------
-    # Resumen
-    # -------------------
-    cursor.execute("SELECT COUNT(*) FROM estudiante;")
-    print(f"👥 Total estudiantes: {cursor.fetchone()[0]}")
-    cursor.execute("SELECT COUNT(*) FROM matricula;")
-    print(f"📘 Total matrículas: {cursor.fetchone()[0]}")
-    cursor.execute("SELECT COUNT(*) FROM nota;")
-    print(f"🧾 Total notas: {cursor.fetchone()[0]}")
+        # -------------------
+        # 4️⃣ Matrículas
+        # -------------------
+        carreras_ids = [row[0] for row in conn.execute(text("SELECT id FROM carrera")).fetchall()]
+        cursos_ids = [row[0] for row in conn.execute(text("SELECT id FROM curso")).fetchall()]
+        estudiantes_ids = [row[0] for row in conn.execute(text("SELECT id FROM estudiante")).fetchall()]
 
-    cursor.close()
-    conn.close()
-    print("\n🎉 Poblamiento completado.")
+        for est_id in estudiantes_ids:
+            for _ in range(random.randint(1, 5)):
+                conn.execute(
+                    text("INSERT INTO matricula (id_estudiante, id_curso, fecha) VALUES (:e,:c,:f)"),
+                    {
+                        "e": est_id,
+                        "c": random.choice(cursos_ids),
+                        "f": f"2025-{random.randint(1,12):02d}-{random.randint(1,28):02d}"
+                    }
+                )
+                if sleep_time > 0:
+                    time.sleep(sleep_time)
+        click.echo("✅ Matrículas insertadas")
+
+        # -------------------
+        # 5️⃣ Notas
+        # -------------------
+        matriculas_ids = [row[0] for row in conn.execute(text("SELECT id_matricula FROM matricula")).fetchall()]
+        for mid in matriculas_ids:
+            conn.execute(
+                text("INSERT INTO nota (id_matricula, nota_final) VALUES (:m, :n)"),
+                {"m": mid, "n": round(random.uniform(0, 20), 2)}
+            )
+            if sleep_time > 0:
+                time.sleep(sleep_time)
+        click.echo("✅ Notas insertadas")
+
+    click.echo("🎉 Poblamiento completado exitosamente.")
 
 @click.group()
 def cli():
