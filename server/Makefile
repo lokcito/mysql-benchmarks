@@ -6,6 +6,9 @@ CONTAINER_NAME = container-mysql-server
 PMA_CONTAINER_NAME=mi-phpmyadmin
 PMA_PORT=8080
 
+ADMINER_CONTAINER_NAME=mi-adminer
+ADMINER_PORT=8081
+
 # Puerto que expone
 PORT = 3306
 
@@ -32,6 +35,12 @@ run-pma:
 		-p $(PMA_PORT):80 \
 		phpmyadmin/phpmyadmin:latest
 
+run-adminer:
+	docker run --network mynet -d --name $(ADMINER_CONTAINER_NAME) \
+		-e ADMINER_DEFAULT_SERVER=$(CONTAINER_NAME) \
+		-p $(ADMINER_PORT):8080 \
+		adminer:latest
+
 ## Exec: Entrar al contenedor con bash
 exec:
 	docker exec -it $(CONTAINER_NAME) bash
@@ -42,8 +51,8 @@ start:
 
 ## Stop: Detener el contenedor en ejecución
 stop:
-	docker stop $(CONTAINER_NAME) $(PMA_CONTAINER_NAME) || true
-	docker rm $(CONTAINER_NAME) $(PMA_CONTAINER_NAME) || true
+	docker stop $(CONTAINER_NAME) $(ADMINER_CONTAINER_NAME) || true
+	docker rm $(CONTAINER_NAME) $(ADMINER_CONTAINER_NAME) || true
 
 ## Remove: Eliminar el contenedor
 rm:
@@ -64,7 +73,7 @@ logs:
 ## Run all: Correr el contenedor en segundo plano
 run: run-db
 	sleep 5
-	$(MAKE) run-pma
+	$(MAKE) run-adminer
 
 ## Help: Mostrar ayuda
 help:
