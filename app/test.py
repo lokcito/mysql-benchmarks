@@ -243,8 +243,6 @@ def query_1():
                             total_estudiantes.add(nombre_row[0])
 
                 click.echo(f"🎓 Estudiantes con nota entre 10 y 15: {len(total_estudiantes)} encontrados")
-                time.sleep(5)
-
     except KeyboardInterrupt:
         click.echo("Interrumpido por usuario.")
 
