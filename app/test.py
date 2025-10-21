@@ -210,39 +210,38 @@ def query_1():
     click.echo("Iniciando consulta...")
     try:
         with db_engine().connect() as conn:
-            while True:
-                # Obtener todos los id de matrícula con notas entre 10 y 15
-                matriculas = conn.execute(text("""
-                    SELECT id_matricula 
-                    FROM nota 
-                    WHERE nota_final BETWEEN 10 AND 15;
-                """)).fetchall()
+            # Obtener todos los id de matrícula con notas entre 10 y 15
+            matriculas = conn.execute(text("""
+                SELECT id_matricula 
+                FROM nota 
+                WHERE nota_final BETWEEN 10 AND 15;
+            """)).fetchall()
 
-                total_estudiantes = set()  # para evitar duplicados
+            total_estudiantes = set()  # para evitar duplicados
 
-                # Por cada matrícula, obtener el estudiante con subconsultas
-                for (id_matricula,) in matriculas:
-                    # ❌ Subconsulta para obtener id_estudiante
-                    estudiante_row = conn.execute(text(f"""
-                        SELECT id_estudiante 
-                        FROM matricula 
-                        WHERE id_matricula = {id_matricula};
+            # Por cada matrícula, obtener el estudiante con subconsultas
+            for (id_matricula,) in matriculas:
+                # ❌ Subconsulta para obtener id_estudiante
+                estudiante_row = conn.execute(text(f"""
+                    SELECT id_estudiante 
+                    FROM matricula 
+                    WHERE id_matricula = {id_matricula};
+                """)).fetchone()
+
+                if estudiante_row:
+                    id_estudiante = estudiante_row[0]
+
+                    # ❌ Subconsulta adicional para obtener nombre del estudiante
+                    nombre_row = conn.execute(text(f"""
+                        SELECT nombre 
+                        FROM estudiante 
+                        WHERE id_estudiante = {id_estudiante};
                     """)).fetchone()
 
-                    if estudiante_row:
-                        id_estudiante = estudiante_row[0]
+                    if nombre_row:
+                        total_estudiantes.add(nombre_row[0])
 
-                        # ❌ Subconsulta adicional para obtener nombre del estudiante
-                        nombre_row = conn.execute(text(f"""
-                            SELECT nombre 
-                            FROM estudiante 
-                            WHERE id_estudiante = {id_estudiante};
-                        """)).fetchone()
-
-                        if nombre_row:
-                            total_estudiantes.add(nombre_row[0])
-
-                click.echo(f"🎓 Estudiantes con nota entre 10 y 15: {len(total_estudiantes)} encontrados")
+            click.echo(f"🎓 Estudiantes con nota entre 10 y 15: {len(total_estudiantes)} encontrados")
     except KeyboardInterrupt:
         click.echo("Interrumpido por usuario.")
 
